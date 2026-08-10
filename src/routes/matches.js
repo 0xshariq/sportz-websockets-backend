@@ -1,9 +1,15 @@
 import { Router } from 'express';
-import { createMatchSchema, listMatchesQuerySchema } from "../validation/matches.js";
+import {
+    MATCH_STATUS,
+    createMatchSchema,
+    listMatchesQuerySchema,
+    matchIdParamSchema,
+    updateScoreSchema,
+} from "../validation/matches.js";
 import { matches } from "../db/schema.js";
 import { db } from "../db/db.js";
-import { getMatchStatus } from "../utils/match-status.js";
-import { desc } from "drizzle-orm";
+import { getMatchStatus, syncMatchStatus } from "../utils/match-status.js";
+import { desc, eq } from "drizzle-orm";
 
 export const matchRouter = Router();
 
@@ -35,10 +41,13 @@ matchRouter.get('/', async (req, res) => {
             .orderBy(desc(matches.createdAt))
             .limit(limit);
 
-        // Derive the current status at read time from startTime and endTime
+        // Derive the current status only when both timestamps are present
         const updatedData = data.map((match) => ({
             ...match,
-            status: getMatchStatus(match.startTime, match.endTime),
+            status:
+                match.startTime && match.endTime
+                    ? getMatchStatus(match.startTime, match.endTime)
+                    : match.status,
         }));
 
         // Return the list of matches with the current status
@@ -57,7 +66,10 @@ matchRouter.post('/', async (req, res) => {
 
     // If the validation fails, return a 400 Bad Request response with the validation errors
     if (!parsed.success) {
-        return res.status(400).json({ error: 'Invalid payload.', details: parsed.error.issues });
+        return res.status(400).json({
+            error: 'Invalid payload.',
+            details: parsed.error.issues
+        });
     }
 
     // Destructure the parsed data to extract startTime, endTime, homeScore, and awayScore
@@ -67,33 +79,37 @@ matchRouter.post('/', async (req, res) => {
 
         // Insert the new match into the database
         const [event] = await db.insert(matches).values({
-            ...parsed.data, // Spread the parsed data to include all other fields from the request body
-            startTime: new Date(startTime), // Convert startTime to a Date object
-            endTime: new Date(endTime), // Convert endTime to a Date object
-            homeScore: homeScore ?? 0, // If homeScore is not provided, default to 0
-            awayScore: awayScore ?? 0, // If awayScore is not provided, default to 0
-            status: getMatchStatus(startTime, endTime), // Determine the match status based on startTime and endTime
+            ...parsed.data,
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
+            homeScore: homeScore ?? 0,
+            awayScore: awayScore ?? 0,
+            status: getMatchStatus(startTime, endTime),
         }).returning();
 
-        // Broadcast the new match to all connected WebSocket clients
+        // Broadcast the new match independently from the database mutation
         if (res.app.locals.broadcastMatchCreated) {
-            res.app.locals.broadcastMatchCreated(event);
+            try {
+                await res.app.locals.broadcastMatchCreated(event);
+            } catch (err) {
+                console.error('Failed to broadcast match creation:', err);
+            }
         }
 
         // Return a 201 Created response with the newly created match data
         res.status(201).json({ data: event });
     } catch (e) {
-        // If an error occurs during the database operation, return a 500 Internal Server Error response with the error details
-        res.status(500).json({ error: 'Failed to create match.', details: JSON.stringify(e) });
+        console.error('Failed to create match:', e);
+        res.status(500).json({ error: 'Failed to create match.' });
     }
-})
+});
 
 matchRouter.patch('/:id/score', async (req, res) => {
     const paramsParsed = matchIdParamSchema.safeParse(req.params);
     if (!paramsParsed.success) {
         return res
             .status(400)
-            .json({ error: 'Invalid match id', details: formatZodError(paramsParsed.error) });
+            .json({ error: 'Invalid match id', details: paramsParsed.error.issues });
     }
 
     const bodyParsed = updateScoreSchema.safeParse(req.body);
@@ -141,15 +157,21 @@ matchRouter.patch('/:id/score', async (req, res) => {
             .where(eq(matches.id, matchId))
             .returning();
 
+        // Broadcast the score update independently from the database mutation
         if (res.app.locals.broadcastScoreUpdate) {
-            res.app.locals.broadcastScoreUpdate(matchId, {
-                homeScore: updated.homeScore,
-                awayScore: updated.awayScore,
-            });
+            try {
+                await res.app.locals.broadcastScoreUpdate(matchId, {
+                    homeScore: updated.homeScore,
+                    awayScore: updated.awayScore,
+                });
+            } catch (err) {
+                console.error('Failed to broadcast score update:', err);
+            }
         }
 
         res.json({ data: updated });
     } catch (err) {
+        console.error('Failed to update score:', err);
         res.status(500).json({ error: 'Failed to update score' });
     }
 });
