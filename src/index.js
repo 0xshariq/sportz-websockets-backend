@@ -5,8 +5,6 @@ import express from 'express';
 import http from 'http';
 import { matchRouter } from "./routes/matches.js";
 import { attachWebSocketServer } from "./ws/server.js";
-import { securityMiddleware } from "./arcjet.js";
-import { commentaryRouter } from "./routes/commentary.js";
 
 const PORT = Number(process.env.PORT || 8000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -23,7 +21,6 @@ app.get('/', (req, res) => {
 // app.use(securityMiddleware());
 
 app.use('/matches', matchRouter);
-app.use('/matches/:id/commentary', commentaryRouter);
 
 const { broadcastMatchCreated, broadcastCommentary, broadcastScoreUpdate } = attachWebSocketServer(server);
 
@@ -36,8 +33,19 @@ app.locals.broadcastScoreUpdate = broadcastScoreUpdate;
 // In simple terms, app.locals is like a global storage for your Express app where you can keep data that you want to share across different parts of your application, such as routes and middleware.
 
 server.listen(PORT, HOST, () => {
-  const baseUrl = HOST === '0.0.0.0' ? `http://localhost:${PORT}` : `http://${HOST}:${PORT}`;
+  const address = server.address();
+  const actualPort = address.port;
+  const actualHost = address.address;
 
-  console.log(`Server is running on ${baseUrl}`);
-  console.log(`WebSocket Server is running on ${baseUrl.replace('http', 'ws')}/ws`);
+  // Format IPv6 addresses with brackets
+  const formattedHost = actualHost.includes(':') ? `[${actualHost}]` : actualHost;
+  const fallbackHost = actualHost === '::' || actualHost === '0.0.0.0' ? 'localhost' : formattedHost;
+
+  // Use PUBLIC_URL if configured, otherwise derive from server address
+  const publicUrl = process.env.PUBLIC_URL;
+  const httpUrl = publicUrl || `http://${fallbackHost}:${actualPort}`;
+  const wsUrl = publicUrl ? `${publicUrl.replace('http://', 'ws://').replace('https://', 'wss://')}/ws` : `ws://${fallbackHost}:${actualPort}/ws`;
+
+  console.log(`Server is running on http://${formattedHost}:${actualPort}`);
+  console.log(`WebSocket Server is running on ${wsUrl}`);
 });
