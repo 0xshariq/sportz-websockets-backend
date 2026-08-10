@@ -25,9 +25,15 @@ app.get('/', (req, res) => {
 app.use('/matches', matchRouter);
 app.use('/matches/:id/commentary', commentaryRouter);
 
-const { broadcastMatchCreated, broadcastCommentary } = attachWebSocketServer(server);
+const { broadcastMatchCreated, broadcastCommentary, broadcastScoreUpdate } = attachWebSocketServer(server);
+
+// Attach the broadcast functions to the app locals so they can be accessed in the routes.
 app.locals.broadcastMatchCreated = broadcastMatchCreated;
 app.locals.broadcastCommentary = broadcastCommentary;
+app.locals.broadcastScoreUpdate = broadcastScoreUpdate;
+
+// What is app.locals? It's a property of the Express application instance that allows you to store variables that are accessible throughout the application. In this case, we're storing the broadcast functions so they can be accessed in the routes.
+// In simple terms, app.locals is like a global storage for your Express app where you can keep data that you want to share across different parts of your application, such as routes and middleware.
 
 server.listen(PORT, HOST, () => {
   const baseUrl = HOST === '0.0.0.0' ? `http://localhost:${PORT}` : `http://${HOST}:${PORT}`;
