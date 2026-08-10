@@ -172,8 +172,7 @@ export function attachWebSocketServer(server) {
             return;
         }
 
-        // Apply Arcjet protection to the WebSocket upgrade request
-        // when WebSocket protection is configured.
+        // Apply Arcjet protection to the WebSocket upgrade request when WebSocket protection is configured.
         if (wsArcjet) {
             try {
                 const decision = await wsArcjet.protect(req);

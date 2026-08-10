@@ -20,7 +20,8 @@ app.get('/', (req, res) => {
   res.send('Hello from Express server!');
 });
 
-// app.use(securityMiddleware());
+// Apply the Arcjet security middleware to all incoming HTTP requests.
+app.use(securityMiddleware());
 
 app.use('/matches', matchRouter);
 app.use('/matches/:id/commentary', commentaryRouter);
