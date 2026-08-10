@@ -77,7 +77,8 @@ matchRouter.post('/', async (req, res) => {
 
     try {
 
-        // Insert the new match into the database
+        // Insert the new match into the database and return the newly created match data. and derive the current status based on the provided timestamps.
+        // Destructure the result to get the first match (event) from the returned array.
         const [event] = await db.insert(matches).values({
             ...parsed.data,
             startTime: new Date(startTime),
