@@ -6,6 +6,9 @@ import { wsArcjet } from "../arcjet.js";
 // matchId -> Set<WebSocket>
 const matchSubscribers = new Map();
 
+// Limit the number of matches a single WebSocket client can subscribe to.
+const MAX_SUBSCRIPTIONS_PER_SOCKET = 100;
+
 // Add a socket to a match's subscriber list.
 function subscribe(matchId, socket) {
     if (!matchSubscribers.has(matchId)) {
@@ -47,10 +50,13 @@ function sendJson(socket, payload) {
 
 // Broadcast a JSON payload to every connected WebSocket client.
 function broadcastToAll(wss, payload) {
+
+    const message = JSON.stringify(payload);
+
     for (const client of wss.clients) {
         if (client.readyState !== WebSocket.OPEN) continue;
 
-        client.send(JSON.stringify(payload));
+        client.send(message);
     }
 }
 
@@ -88,6 +94,19 @@ function handleMessage(socket, data) {
 
     // Subscribe the client to updates for a specific match.
     if (message?.type === "subscribe" && Number.isInteger(message.matchId)) {
+
+        // Enforce the subscription limit per socket. If the client is already subscribed to the match, allow it to continue without error.
+        if (
+            !socket.subscriptions.has(message.matchId) &&
+            socket.subscriptions.size >= MAX_SUBSCRIPTIONS_PER_SOCKET
+        ) {
+            sendJson(socket, {
+                type: 'error',
+                message: 'Subscription limit reached'
+            });
+            return;
+        }
+
         subscribe(message.matchId, socket);
         socket.subscriptions.add(message.matchId);
 
@@ -123,13 +142,33 @@ export function attachWebSocketServer(server) {
 
     // Handle HTTP -> WebSocket upgrade requests.
     server.on('upgrade', async (req, socket, head) => {
-        const { pathname } = new URL(
-            req.url,
-            `http://${req.headers.host}`
-        );
+        let pathname;
+
+        // Parse the request URL using a fixed base URL.
+        // The actual hostname is not needed because we only care about the pathname.
+        try {
+            pathname = new URL(req.url, 'http://localhost').pathname;
+        } catch (e) {
+            console.error('Invalid WebSocket upgrade request URL', e);
+
+            // Reject malformed request targets before closing the socket.
+            socket.write(
+                'HTTP/1.1 400 Bad Request\r\n' +
+                'Connection: close\r\n' +
+                '\r\n'
+            );
+            socket.destroy();
+            return;
+        }
 
         // Only allow WebSocket connections through the /ws endpoint.
         if (pathname !== '/ws') {
+            socket.write(
+                'HTTP/1.1 404 Not Found\r\n' +
+                'Connection: close\r\n' +
+                '\r\n'
+            );
+            socket.destroy();
             return;
         }
 
