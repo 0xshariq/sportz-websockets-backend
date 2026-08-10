@@ -285,10 +285,19 @@ export function attachWebSocketServer(server) {
         });
     }
 
+    // Broadcast a score update only to clients subscribed to the match.
+    function broadcastScoreUpdate(matchId, score) {
+        broadcastToMatch(matchId, {
+            type: 'score_update',
+            data: score
+        });
+    }
+
     // Expose broadcast functions so the HTTP routes can trigger
     // WebSocket notifications after successful database operations.
     return {
         broadcastMatchCreated,
-        broadcastCommentary
+        broadcastCommentary,
+        broadcastScoreUpdate
     };
 }
