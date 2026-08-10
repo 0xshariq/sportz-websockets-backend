@@ -16,27 +16,38 @@ matchRouter.get('/', async (req, res) => {
 
     // If the validation fails, return a 400 Bad Request response with the validation errors
     if (!parsed.success) {
-        return res.status(400).json({ error: 'Invalid query.', details: parsed.error.issues });
+        return res.status(400).json({
+            error: 'Invalid query.',
+            details: parsed.error.issues
+        });
     }
 
-    // Determine the limit for the number of matches to return, defaulting to 50 if not specified, and ensuring it does not exceed MAX_LIMIT
+    // Determine the limit for the number of matches to return, defaulting to 50 if not specified,
+    // and ensuring it does not exceed MAX_LIMIT
     const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT);
 
     try {
-        // Query the database to retrieve the list of matches, ordered by creation date in descending order, and limited to the specified number of matches
+        // Query the database to retrieve the list of matches, ordered by creation date in descending order,
+        // and limited to the specified number of matches
         const data = await db
             .select()
             .from(matches)
-            .orderBy((desc(matches.createdAt)))
-            .limit(limit)
+            .orderBy(desc(matches.createdAt))
+            .limit(limit);
 
-        // Return the list of matches in the response
-        res.json({ data });
+        // Derive the current status at read time from startTime and endTime
+        const updatedData = data.map((match) => ({
+            ...match,
+            status: getMatchStatus(match.startTime, match.endTime),
+        }));
+
+        // Return the list of matches with the current status
+        res.json({ data: updatedData });
     } catch (e) {
         // If an error occurs during the database operation, return a 500 Internal Server Error response with the error details
         res.status(500).json({ error: 'Failed to list matches.' });
     }
-})
+});
 
 // POST /matches
 matchRouter.post('/', async (req, res) => {

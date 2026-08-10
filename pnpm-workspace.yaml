@@ -1,5 +1,5 @@
 allowBuilds:
-  '@apminsight/native-stats': true
+  '@apminsight/native-stats': '2.0.0'
   esbuild: true
 minimumReleaseAgeExclude:
   - pg-protocol@1.16.0
