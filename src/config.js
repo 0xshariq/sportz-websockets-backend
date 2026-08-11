@@ -12,8 +12,8 @@ const envSchema = z.object({
   ARCJET_ENV: z.string().default('development'),
   BROADCAST: z.preprocess((value) => {
     if (value === undefined) return true;
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
+    if (value === '1' || value === true) return true;
+    if (value === '0' || value === false) return false;
     return value;
   }, z.boolean()),
   DELAY_MS: z.coerce.number().int().nonnegative().default(250),
