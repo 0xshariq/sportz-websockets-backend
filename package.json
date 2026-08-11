@@ -11,7 +11,8 @@
     "start": "node src/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "seed": "node src/seed/seed.js"
   },
   "dependencies": {
     "@arcjet/inspect": "^1.9.1",

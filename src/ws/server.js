@@ -147,7 +147,11 @@ export function attachWebSocketServer(server) {
         // Parse the request URL using a fixed base URL.
         // The actual hostname is not needed because we only care about the pathname.
         try {
-            pathname = new URL(req.url, 'http://localhost').pathname;
+            const baseUrl =
+        process.env.NODE_ENV === 'production'
+            ? process.env.API_URL
+            : `http://localhost:${PORT}`;
+            pathname = new URL(req.url, baseUrl).pathname;
         } catch (e) {
             console.error('Invalid WebSocket upgrade request URL', e);
 
