@@ -144,14 +144,14 @@ export function attachWebSocketServer(server) {
     server.on('upgrade', async (req, socket, head) => {
         let pathname;
 
-        // Parse the request URL using a fixed base URL.
-        // The actual hostname is not needed because we only care about the pathname.
+        // Parse the request URL using the incoming host so this works in local,
+        // preview, and production environments without relying on an undefined PORT.
         try {
-            const baseUrl =
-        process.env.NODE_ENV === 'production'
-            ? process.env.API_URL
-            : `http://localhost:${PORT}`;
-            pathname = new URL(req.url, baseUrl).pathname;
+            const protocol = req.headers['x-forwarded-proto'] === 'https'
+                ? 'https'
+                : 'http';
+            const host = req.headers.host || `localhost:${process.env.PORT || 3000}`;
+            pathname = new URL(req.url, `${protocol}://${host}`).pathname;
         } catch (e) {
             console.error('Invalid WebSocket upgrade request URL', e);
 
