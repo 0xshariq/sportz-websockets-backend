@@ -39,11 +39,17 @@ async function loadSeedData() {
     }
 
     if (Array.isArray(parsed.commentary)) {
-        return { feed: parsed.commentary, matches: parsed.matches ?? [] };
+        return {
+            feed: parsed.commentary,
+            matches: Array.isArray(parsed.matches) ? parsed.matches : [],
+        };
     }
 
     if (Array.isArray(parsed.feed)) {
-        return { feed: parsed.feed, matches: parsed.matches ?? [] };
+        return {
+            feed: parsed.feed,
+            matches: Array.isArray(parsed.matches) ? parsed.matches : [],
+        };
     }
 
     throw new Error(
