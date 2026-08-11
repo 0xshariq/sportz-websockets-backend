@@ -3,6 +3,9 @@ import fs from "fs/promises";
 
 const DELAY_MS = Number.parseInt(process.env.DELAY_MS || "250", 10);
 const rawMatchCount = process.env.MATCH_COUNT ?? "0";
+if (rawMatchCount.trim() === "") {
+    throw new Error("MATCH_COUNT must be a nonnegative integer.");
+}
 const MATCH_COUNT = Number(rawMatchCount);
 if (!Number.isInteger(MATCH_COUNT) || MATCH_COUNT < 0) {
     throw new Error("MATCH_COUNT must be a nonnegative integer.");
