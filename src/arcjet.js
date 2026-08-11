@@ -1,9 +1,12 @@
 import arcjet, { detectBot, shield, slidingWindow } from "@arcjet/node";
+import { config } from './config.js';
 
-const arcjetKey = process.env.ARCJET_KEY;
-const arcjetMode = process.env.ARCJET_MODE === 'DRY_RUN' ? 'DRY_RUN' : 'LIVE';
+const arcjetKey = config.ARCJET_KEY;
+const arcjetMode = config.ARCJET_MODE;
 
-if (!arcjetKey) throw new Error('ARCJET_KEY environment variable is missing.');
+if (!arcjetKey && config.NODE_ENV === 'production') {
+    throw new Error('ARCJET_KEY environment variable is missing in production.');
+}
 
 export const httpArcjet = arcjetKey ?
     arcjet({
