@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       '@arcjet/inspect':
-        specifier: ^1.0.0-beta.17
+        specifier: ^1.9.1
         version: 1.9.1
       '@arcjet/node':
-        specifier: ^1.0.0-beta.17
+        specifier: ^1.9.1
         version: 1.9.1
       apminsight:
-        specifier: ^5.2.1
+        specifier: ^5.5.1
         version: 5.5.1
       dotenv:
         specifier: ^17.4.2
@@ -43,8 +43,8 @@ importers:
         specifier: ^0.31.10
         version: 0.31.10
       tsx:
-        specifier: ^4.23.11
-        version: 4.23.11
+        specifier: ^4.23.12
+        version: 4.23.12
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1128,6 +1128,11 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  tsx@4.23.12:
+    resolution: {integrity: sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+
   type-is@2.1.0:
     resolution: {integrity: sha512-faYHw0anBbc/kWF3zFTEnxSFOAGUX9GFbOBthvDdLsIlEoWOFOtS0zgCiQYwIskL9iGXZL3kAXD8OoZ4GmMATA==}
     engines: {node: '>= 18'}
@@ -2059,6 +2064,12 @@ snapshots:
     optional: true
 
   tsx@4.23.11:
+    dependencies:
+      esbuild: 0.28.1
+    optionalDependencies:
+      fsevents: 2.3.3
+
+  tsx@4.23.12:
     dependencies:
       esbuild: 0.28.1
     optionalDependencies:

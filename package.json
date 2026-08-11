@@ -14,9 +14,9 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@arcjet/inspect": "^1.0.0-beta.17",
-    "@arcjet/node": "^1.0.0-beta.17",
-    "apminsight": "^5.2.1",
+    "@arcjet/inspect": "^1.9.1",
+    "@arcjet/node": "^1.9.1",
+    "apminsight": "^5.5.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@types/pg": "^8.21.0",
     "drizzle-kit": "^0.31.10",
-    "tsx": "^4.23.11",
+    "tsx": "^4.23.12",
     "typescript": "^6.0.3"
   }
 }
