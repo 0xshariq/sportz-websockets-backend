@@ -40,38 +40,39 @@ function cleanupSubscriptions(socket) {
     }
 }
 
-// Send a JSON payload to a single WebSocket client.
-// Only send when the connection is currently open.
-function sendJson(socket, payload) {
-    if (socket.readyState !== WebSocket.OPEN || socket.bufferedAmount > 1024 * 1024) return;
-    socket.send(JSON.stringify(payload));
+const MAX_BUFFERED_AMOUNT = 1024 * 1024;
+
+// Send one already-serialized message through the only WebSocket send path.
+// A backpressured client cannot reliably receive required updates, so close it
+// and let the client reconnect/resynchronize instead of silently dropping data.
+function sendSerialized(socket, message) {
+    if (socket.readyState !== WebSocket.OPEN) return false;
+    if (socket.bufferedAmount > MAX_BUFFERED_AMOUNT) {
+        socket.terminate();
+        return false;
+    }
+    socket.send(message);
+    return true;
 }
 
-// Broadcast a JSON payload to every connected WebSocket client.
+function sendJson(socket, payload) {
+    return sendSerialized(socket, JSON.stringify(payload));
+}
+
 function broadcastToAll(wss, payload) {
-
     const message = JSON.stringify(payload);
-
     for (const client of wss.clients) {
-        if (client.readyState !== WebSocket.OPEN) continue;
-
-        client.send(message);
+        sendSerialized(client, message);
     }
 }
 
-// Broadcast a JSON payload only to clients subscribed to a specific match.
 function broadcastToMatch(matchId, payload) {
     const subscribers = matchSubscribers.get(matchId);
-
     if (!subscribers || subscribers.size === 0) return;
 
-    // Serialize the payload only once instead of once per client.
     const message = JSON.stringify(payload);
-
     for (const client of subscribers) {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
+        sendSerialized(client, message);
     }
 }
 

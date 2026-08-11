@@ -2,7 +2,11 @@ import "dotenv/config";
 import fs from "fs/promises";
 
 const DELAY_MS = Number.parseInt(process.env.DELAY_MS || "250", 10);
-const MATCH_COUNT = Number.parseInt(process.env.MATCH_COUNT || "0", 10);
+const rawMatchCount = process.env.MATCH_COUNT ?? "0";
+const MATCH_COUNT = Number(rawMatchCount);
+if (!Number.isInteger(MATCH_COUNT) || MATCH_COUNT < 0) {
+    throw new Error("MATCH_COUNT must be a nonnegative integer.");
+}
 const NEW_MATCH_DELAY_MIN_MS = 2000;
 const NEW_MATCH_DELAY_MAX_MS = 3000;
 const DEFAULT_MATCH_DURATION_MINUTES = Number.parseInt(
@@ -529,6 +533,7 @@ async function seed() {
     console.log(`📡 Seeding via API: ${API_URL}`);
 
     const { feed, matches: seedMatches } = await loadSeedData();
+    const matchesToSeed = MATCH_COUNT > 0 ? seedMatches.slice(0, MATCH_COUNT) : seedMatches;
     const matchesList = await fetchMatches();
 
     const matchMap = new Map();
@@ -549,7 +554,6 @@ async function seed() {
     }
 
     if (Array.isArray(seedMatches) && seedMatches.length > 0) {
-        const matchesToSeed = MATCH_COUNT > 0 ? seedMatches.slice(0, MATCH_COUNT) : seedMatches;
         for (const seedMatch of matchesToSeed) {
             const key = `${seedMatch.sport}|${seedMatch.homeTeam}|${seedMatch.awayTeam}`;
             let match = matchKeyMap.get(key);
@@ -591,7 +595,7 @@ async function seed() {
     //   await updateMatchScore(matchId, 0, 0);
     // }
 
-    const expandedFeed = expandFeedForMatches(feed, seedMatches);
+    const expandedFeed = expandFeedForMatches(feed, matchesToSeed);
     const randomizedFeed = buildRandomizedFeed(expandedFeed, matchMap);
     // NOTE: Remaining entry counts were used to end matches; disabled for now.
     // const remainingByMatchId = new Map();

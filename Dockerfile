@@ -6,9 +6,9 @@ FROM base AS dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
-FROM dependencies AS production
-COPY --from=dependencies /app/node_modules ./node_modules
+FROM base AS production
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile --prod
 COPY src ./src
 COPY .env.example ./
 ENV NODE_ENV=production
@@ -21,4 +21,5 @@ COPY drizzle.config.js ./
 COPY drizzle ./drizzle
 COPY src/db ./src/db
 ENV NODE_ENV=production
+USER node
 CMD ["pnpm", "db:migrate"]
