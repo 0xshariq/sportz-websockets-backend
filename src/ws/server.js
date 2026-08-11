@@ -43,8 +43,7 @@ function cleanupSubscriptions(socket) {
 // Send a JSON payload to a single WebSocket client.
 // Only send when the connection is currently open.
 function sendJson(socket, payload) {
-    if (socket.readyState !== WebSocket.OPEN) return;
-
+    if (socket.readyState !== WebSocket.OPEN || socket.bufferedAmount > 1024 * 1024) return;
     socket.send(JSON.stringify(payload));
 }
 
@@ -217,6 +216,9 @@ export function attachWebSocketServer(server) {
 
     // Handle newly established WebSocket connections.
     wss.on('connection', async (socket, req) => {
+        let messagesInWindow = 0;
+        const messageWindow = setInterval(() => { messagesInWindow = 0; }, 1000);
+
         // Used by the heartbeat mechanism to detect dead connections.
         socket.isAlive = true;
 
@@ -235,6 +237,10 @@ export function attachWebSocketServer(server) {
 
         // Handle messages sent by this client.
         socket.on('message', (data) => {
+            if (++messagesInWindow > 30) {
+                sendJson(socket, { type: 'error', message: 'Message rate limit exceeded' });
+                return socket.terminate();
+            }
             handleMessage(socket, data);
         });
 
@@ -245,6 +251,7 @@ export function attachWebSocketServer(server) {
 
         // Remove all subscriptions when the client disconnects.
         socket.on('close', () => {
+            clearInterval(messageWindow);
             cleanupSubscriptions(socket);
         });
 
@@ -301,6 +308,7 @@ export function attachWebSocketServer(server) {
     return {
         broadcastMatchCreated,
         broadcastCommentary,
-        broadcastScoreUpdate
+        broadcastScoreUpdate,
+        closeWebSocketServer: () => new Promise((resolve) => wss.close(resolve)),
     };
 }

@@ -1,13 +1,15 @@
-import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
-
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not defined');
-}
+import { config } from '../config.js';
 
 export const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: config.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+  maxLifetimeSeconds: 3_600,
 });
+
+pool.on('error', (error) => console.error('Unexpected PostgreSQL pool error:', error));
 
 export const db = drizzle(pool);

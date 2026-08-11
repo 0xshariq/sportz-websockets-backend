@@ -1,78 +1,30 @@
-import { Router } from "express";
-import { eq, desc } from "drizzle-orm";
-import { matchIdParamSchema } from "../validation/matches.js";
-import { createCommentarySchema, listCommentaryQuerySchema } from "../validation/commentary.js";
-import { db } from "../db/db.js";
-import { commentary } from "../db/schema.js";
-
-const MAX_LIMIT = 100;
+import { Router } from 'express';
+import { eq, desc } from 'drizzle-orm';
+import { matchIdParamSchema } from '../validation/matches.js';
+import { createCommentarySchema, listCommentaryQuerySchema } from '../validation/commentary.js';
+import { db } from '../db/db.js';
+import { commentary, matches } from '../db/schema.js';
+import { AppError, asyncHandler } from '../middleware/errors.js';
 
 export const commentaryRouter = Router({ mergeParams: true });
 
-commentaryRouter.get('/', async (req, res) => {
-    const paramsResult = matchIdParamSchema.safeParse(req.params);
+commentaryRouter.get('/', asyncHandler(async (req, res) => {
+  const params = matchIdParamSchema.safeParse(req.params);
+  const query = listCommentaryQuerySchema.safeParse(req.query);
+  if (!params.success) throw new AppError(400, 'Invalid match ID.', params.error.issues);
+  if (!query.success) throw new AppError(400, 'Invalid query parameters.', query.error.issues);
+  const results = await db.select().from(commentary).where(eq(commentary.matchId, params.data.id)).orderBy(desc(commentary.createdAt)).limit(query.data.limit ?? 10);
+  res.json({ data: results });
+}));
 
-    if (!paramsResult.success) {
-        return res.status(400).json({ error: 'Invalid match ID.', details: paramsResult.error.issues });
-    }
-
-    const queryResult = listCommentaryQuerySchema.safeParse(req.query);
-    if (!queryResult.success) {
-        return res.status(400).json({ error: 'Invalid query parameters.', details: queryResult.error.issues });
-    }
-
-    try {
-        const { id: matchId } = paramsResult.data;
-        const { limit = 10 } = queryResult.data;
-
-        const safeLimit = Math.min(limit, MAX_LIMIT);
-
-        const results = await db
-            .select()
-            .from(commentary)
-            .where(eq(commentary.matchId, matchId))
-            .orderBy(desc(commentary.createdAt))
-            .limit(safeLimit);
-
-        res.status(200).json({ data: results });
-    } catch (error) {
-        console.error('Failed to fetch commentary:', error);
-        res.status(500).json({ error: 'Failed to fetch commentary.' });
-    }
-});
-
-commentaryRouter.post('/', async (req, res) => {
-    const paramsResult = matchIdParamSchema.safeParse(req.params);
-
-    if (!paramsResult.success) {
-        return res.status(400).json({ error: 'Invalid match ID.', details: paramsResult.error.issues });
-    }
-
-    const bodyResult = createCommentarySchema.safeParse(req.body);
-
-    if (!bodyResult.success) {
-        return res.status(400).json({ error: 'Invalid commentary payload.', details: bodyResult.error.issues });
-    }
-
-    try {
-        const { minute, ...rest } = bodyResult.data;
-        const [ result ] = await db.insert(commentary).values({
-            matchId: paramsResult.data.id,
-            minute,
-            ...rest
-        }).returning();
-
-        if (res.app.locals.broadcastCommentary) {
-            try {
-                await res.app.locals.broadcastCommentary(result.matchId, result);
-            } catch (err) {
-                console.error('Failed to broadcast commentary:', err);
-            }
-        }
-
-        res.status(201).json({ data: result });
-    } catch (error) {
-        console.error('Failed to create commentary:', error);
-        res.status(500).json({ error: 'Failed to create commentary.' });
-    }
-});
+commentaryRouter.post('/', asyncHandler(async (req, res) => {
+  const params = matchIdParamSchema.safeParse(req.params);
+  const body = createCommentarySchema.safeParse(req.body);
+  if (!params.success) throw new AppError(400, 'Invalid match ID.', params.error.issues);
+  if (!body.success) throw new AppError(400, 'Invalid commentary payload.', body.error.issues);
+  const [match] = await db.select({ id: matches.id }).from(matches).where(eq(matches.id, params.data.id)).limit(1);
+  if (!match) throw new AppError(404, 'Match not found');
+  const [result] = await db.insert(commentary).values({ matchId: params.data.id, ...body.data }).returning();
+  res.app.locals.broadcastCommentary?.(result.matchId, result);
+  res.status(201).json({ data: result });
+}));
