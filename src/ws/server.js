@@ -309,6 +309,15 @@ export function attachWebSocketServer(server) {
         broadcastMatchCreated,
         broadcastCommentary,
         broadcastScoreUpdate,
-        closeWebSocketServer: () => new Promise((resolve) => wss.close(resolve)),
+        closeWebSocketServer: () => new Promise((resolve) => {
+            const deadline = setTimeout(resolve, 5000);
+            for (const client of wss.clients) {
+                client.terminate();
+            }
+            wss.close(() => {
+                clearTimeout(deadline);
+                resolve();
+            });
+        }),
     };
 }

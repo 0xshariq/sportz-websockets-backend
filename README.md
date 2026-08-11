@@ -17,7 +17,7 @@ A production-oriented Express and WebSocket backend for live sports matches and 
 
 ## Requirements
 
-- Node.js 22+
+- Node.js `>=22.21.0 <23` or `>=24.5.0`
 - pnpm
 - PostgreSQL
 - Arcjet key for protected development/production environments
@@ -26,10 +26,10 @@ A production-oriented Express and WebSocket backend for live sports matches and 
 
 ```bash
 pnpm install
-cp .env.example .env.development.local
+cp .env.example .env
 ```
 
-Set `DATABASE_URL` and `ARCJET_KEY` in `.env.development.local`. Use `ARCJET_MODE=DRY_RUN` for local development when appropriate.
+Set `DATABASE_URL` and `ARCJET_KEY` in `.env`. Use `ARCJET_MODE=DRY_RUN` for local development when appropriate. `MATCH_COUNT=0` seeds all configured matches; a positive value limits the number of seed matches.
 
 ## Commands
 
@@ -98,7 +98,14 @@ pnpm db:migrate
 pnpm start
 ```
 
-The included `Dockerfile` provides a production container. Configure all secrets through the deployment platform rather than committing `.env` files. Keep `ARCJET_MODE=LIVE`, use TLS at the edge, and monitor `/health` and `/ready`.
+The included `Dockerfile` provides a production container. For containerized deployments, build and run the dedicated migration target before starting the default production target:
+
+```bash
+docker build --target migrator -t sportz-migrator .
+docker run --rm --env-file .env sportz-migrator
+docker build --target production -t sportz-backend .
+docker run --rm --env-file .env -p 3000:3000 sportz-backend
+``` Configure all secrets through the deployment platform rather than committing `.env` files. Keep `ARCJET_MODE=LIVE`, use TLS at the edge, and monitor `/health` and `/ready`.
 
 ## Project structure
 

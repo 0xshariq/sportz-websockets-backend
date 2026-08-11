@@ -5,6 +5,7 @@ import { createCommentarySchema, listCommentaryQuerySchema } from '../validation
 import { db } from '../db/db.js';
 import { commentary, matches } from '../db/schema.js';
 import { AppError, asyncHandler } from '../middleware/errors.js';
+import { MAX_LIST_LIMIT } from '../constants.js';
 
 export const commentaryRouter = Router({ mergeParams: true });
 
@@ -13,7 +14,8 @@ commentaryRouter.get('/', asyncHandler(async (req, res) => {
   const query = listCommentaryQuerySchema.safeParse(req.query);
   if (!params.success) throw new AppError(400, 'Invalid match ID.', params.error.issues);
   if (!query.success) throw new AppError(400, 'Invalid query parameters.', query.error.issues);
-  const results = await db.select().from(commentary).where(eq(commentary.matchId, params.data.id)).orderBy(desc(commentary.createdAt)).limit(query.data.limit ?? 10);
+  const limit = Math.min(query.data.limit ?? 10, MAX_LIST_LIMIT);
+  const results = await db.select().from(commentary).where(eq(commentary.matchId, params.data.id)).orderBy(desc(commentary.createdAt)).limit(limit);
   res.json({ data: results });
 }));
 

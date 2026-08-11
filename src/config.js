@@ -10,7 +10,12 @@ const envSchema = z.object({
   ARCJET_KEY: z.string().min(1).optional(),
   ARCJET_MODE: z.enum(['LIVE', 'DRY_RUN']).default('LIVE'),
   ARCJET_ENV: z.string().default('development'),
-  BROADCAST: z.coerce.boolean().default(true),
+  BROADCAST: z.preprocess((value) => {
+    if (value === undefined) return true;
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return value;
+  }, z.boolean()),
   DELAY_MS: z.coerce.number().int().nonnegative().default(250),
   MATCH_COUNT: z.coerce.number().int().nonnegative().default(0),
 });

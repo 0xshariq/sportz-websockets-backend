@@ -5,13 +5,14 @@ import { matches } from '../db/schema.js';
 import { db } from '../db/db.js';
 import { getMatchStatus, syncMatchStatus } from '../utils/match-status.js';
 import { AppError, asyncHandler } from '../middleware/errors.js';
+import { MAX_LIST_LIMIT } from '../constants.js';
 
 export const matchRouter = Router();
 
 matchRouter.get('/', asyncHandler(async (req, res) => {
   const parsed = listMatchesQuerySchema.safeParse(req.query);
   if (!parsed.success) throw new AppError(400, 'Invalid query.', parsed.error.issues);
-  const limit = parsed.data.limit ?? 50;
+  const limit = Math.min(parsed.data.limit ?? 50, MAX_LIST_LIMIT);
   const data = await db.select().from(matches).orderBy(desc(matches.createdAt)).limit(limit);
   res.json({ data: data.map((match) => ({ ...match, status: match.startTime && match.endTime ? getMatchStatus(match.startTime, match.endTime) : match.status })) });
 }));

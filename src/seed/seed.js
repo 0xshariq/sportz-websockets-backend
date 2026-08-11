@@ -2,6 +2,7 @@ import "dotenv/config";
 import fs from "fs/promises";
 
 const DELAY_MS = Number.parseInt(process.env.DELAY_MS || "250", 10);
+const MATCH_COUNT = Number.parseInt(process.env.MATCH_COUNT || "0", 10);
 const NEW_MATCH_DELAY_MIN_MS = 2000;
 const NEW_MATCH_DELAY_MAX_MS = 3000;
 const DEFAULT_MATCH_DURATION_MINUTES = Number.parseInt(
@@ -548,7 +549,8 @@ async function seed() {
     }
 
     if (Array.isArray(seedMatches) && seedMatches.length > 0) {
-        for (const seedMatch of seedMatches) {
+        const matchesToSeed = MATCH_COUNT > 0 ? seedMatches.slice(0, MATCH_COUNT) : seedMatches;
+        for (const seedMatch of matchesToSeed) {
             const key = `${seedMatch.sport}|${seedMatch.homeTeam}|${seedMatch.awayTeam}`;
             let match = matchKeyMap.get(key);
             if (!match || (FORCE_LIVE && !isLiveMatch(match))) {
