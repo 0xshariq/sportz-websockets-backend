@@ -56,12 +56,14 @@ Object.assign(app.locals, broadcasts);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-server.listen(config.PORT, config.HOST, () => {
-  console.log(`Server is running on ${publicBaseUrl}`);
-  console.log(
-    `WebSocket server is running on ${publicBaseUrl.replace(/^http/, 'ws')}/ws`
-  );
-});
+if (!process.env.VERCEL) {
+  server.listen(config.PORT, config.HOST, () => {
+    console.log(`Server is running on ${publicBaseUrl}`);
+    console.log(
+      `WebSocket server is running on ${publicBaseUrl.replace(/^http/, 'ws')}/ws`
+    );
+  });
+}
 
 let shuttingDown = false;
 
