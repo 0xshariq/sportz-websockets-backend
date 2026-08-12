@@ -117,3 +117,4 @@ docker run --rm --env-file .env -p 3000:3000 sportz-backend
 - `src/middleware/` — shared Express error handling
 - `drizzle/` — database migrations
 - `test/` — automated validation tests
+```
