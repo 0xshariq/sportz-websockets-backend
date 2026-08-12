@@ -8,6 +8,13 @@
       "when": 1786343857929,
       "tag": "0000_needy_zzzax",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786511028662,
+      "tag": "0001_easy_warpath",
+      "breakpoints": true
     }
   ]
 }
