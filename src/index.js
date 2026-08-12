@@ -8,11 +8,6 @@ import { config, publicBaseUrl } from './config.js';
 import { pool } from './db/db.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
 
-if (!process.env.VERCEL) {
-  const { default: AgentAPI } = await import('apminsight');
-  AgentAPI.config();
-}
-
 const app = express();
 const server = http.createServer(app);
 

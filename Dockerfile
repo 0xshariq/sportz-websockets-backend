@@ -14,7 +14,7 @@ COPY .env.example ./
 ENV NODE_ENV=production
 EXPOSE 3000
 USER node
-CMD ["node", "src/index.js"]
+CMD ["node", "src/bootstrap.js"]
 
 FROM dependencies AS migrator
 COPY drizzle.config.js ./
