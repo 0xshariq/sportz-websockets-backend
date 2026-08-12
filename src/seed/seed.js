@@ -17,12 +17,13 @@ const DEFAULT_MATCH_DURATION_MINUTES = Number.parseInt(
     10,
 );
 const FORCE_LIVE =
-    process.env.SEED_FORCE_LIVE !== "0" &&
-    process.env.SEED_FORCE_LIVE !== "false";
-const API_URL = process.env.API_URL;
-if (!API_URL) {
-    throw new Error("API_URL is required to seed via REST endpoints.");
-}
+    process.env.SEED_FORCE_LIVE === "1" ||
+    process.env.SEED_FORCE_LIVE === "true";
+const SEED_CLIENT_HOST = process.env.SEED_CLIENT_HOST || "localhost";
+const SEED_CLIENT_PORT = process.env.SEED_CLIENT_PORT || process.env.PORT || "3000";
+const API_URL =
+    process.env.API_URL ||
+    `http://${SEED_CLIENT_HOST}:${SEED_CLIENT_PORT}`;
 
 const DEFAULT_DATA_FILE = new URL("../data/data.json", import.meta.url);
 
