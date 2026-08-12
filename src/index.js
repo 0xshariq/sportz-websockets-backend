@@ -1,6 +1,3 @@
-import AgentAPI from 'apminsight';
-AgentAPI.config();
-
 import express from 'express';
 import http from 'http';
 import { matchRouter } from './routes/matches.js';
@@ -10,6 +7,11 @@ import { commentaryRouter } from './routes/commentary.js';
 import { config, publicBaseUrl } from './config.js';
 import { pool } from './db/db.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
+
+if (!process.env.VERCEL) {
+  const { default: AgentAPI } = await import('apminsight');
+  AgentAPI.config();
+}
 
 const app = express();
 const server = http.createServer(app);

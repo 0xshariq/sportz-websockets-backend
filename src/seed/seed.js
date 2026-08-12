@@ -19,11 +19,12 @@ const DEFAULT_MATCH_DURATION_MINUTES = Number.parseInt(
 const FORCE_LIVE =
     process.env.SEED_FORCE_LIVE === "1" ||
     process.env.SEED_FORCE_LIVE === "true";
-const SEED_CLIENT_HOST = process.env.SEED_CLIENT_HOST || "localhost";
+const SEED_CLIENT_HOST = process.env.SEED_CLIENT_HOST || "127.0.0.1";
 const SEED_CLIENT_PORT = process.env.SEED_CLIENT_PORT || process.env.PORT || "3000";
-const API_URL =
+const API_URL = (
     process.env.API_URL ||
-    `http://${SEED_CLIENT_HOST}:${SEED_CLIENT_PORT}`;
+    `http://${SEED_CLIENT_HOST}:${SEED_CLIENT_PORT}`
+).replace(/\/+$/, "");
 
 const DEFAULT_DATA_FILE = new URL("../data/data.json", import.meta.url);
 
