@@ -30,6 +30,16 @@ export const config = parsed.data;
 export const isProduction = config.NODE_ENV === 'production';
 export const publicBaseUrl = config.API_URL ?? `http://localhost:${config.PORT}`;
 
+const allowedOrigins = new Set([
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://sportz-websockets-frontend.vercel.app',
+]);
+
+export function isAllowedOrigin(origin) {
+  return !origin || allowedOrigins.has(origin);
+}
+
 export function validateEnvironment({ requireArcjet = true } = {}) {
   if (requireArcjet && !config.ARCJET_KEY) {
     throw new Error('ARCJET_KEY is required outside test mode');

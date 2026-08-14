@@ -1,5 +1,6 @@
 import { WebSocket, WebSocketServer } from 'ws';
 import { wsArcjet } from "../arcjet.js";
+import { isAllowedOrigin } from '../config.js';
 
 // Stores WebSocket clients subscribed to each match.
 // Map structure:
@@ -171,6 +172,17 @@ export function attachWebSocketServer(server) {
                 'HTTP/1.1 404 Not Found\r\n' +
                 'Connection: close\r\n' +
                 '\r\n'
+            );
+            socket.destroy();
+            return;
+        }
+
+        const origin = req.headers.origin;
+        if (!isAllowedOrigin(origin)) {
+            socket.write(
+                'HTTP/1.1 403 Forbidden\\r\\n' +
+                'Connection: close\\r\\n' +
+                '\\r\\n'
             );
             socket.destroy();
             return;
