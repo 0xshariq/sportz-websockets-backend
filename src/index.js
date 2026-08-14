@@ -4,7 +4,7 @@ import { matchRouter } from './routes/matches.js';
 import { attachWebSocketServer } from './ws/server.js';
 import { securityMiddleware } from './arcjet.js';
 import { commentaryRouter } from './routes/commentary.js';
-import { config, publicBaseUrl } from './config.js';
+import { config, isAllowedOrigin, publicBaseUrl } from './config.js';
 import { pool } from './db/db.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
 
@@ -17,6 +17,25 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  next();
+});
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (origin && isAllowedOrigin(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  }
+
+  if (req.method === 'OPTIONS') {
+    return origin && isAllowedOrigin(origin)
+      ? res.sendStatus(204)
+      : res.sendStatus(403);
+  }
+
   next();
 });
 
