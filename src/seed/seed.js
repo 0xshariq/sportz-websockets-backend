@@ -31,7 +31,8 @@ if (parsedApiUrl.search || parsedApiUrl.hash) {
 parsedApiUrl.pathname = parsedApiUrl.pathname.replace(/\/+$/, "");
 const API_URL = parsedApiUrl.toString().replace(/\/$/, "");
 
-const DEFAULT_DATA_FILE = new URL("../data/data.json", import.meta.url);
+const MATCHES_DATA_FILE = new URL("../data/matches.json", import.meta.url);
+const COMMENTARIES_DATA_FILE = new URL("../data/commentaries.json", import.meta.url);
 
 async function readJsonFile(fileUrl) {
     const raw = await fs.readFile(fileUrl, "utf8");
@@ -39,29 +40,26 @@ async function readJsonFile(fileUrl) {
 }
 
 async function loadSeedData() {
-    const parsed = await readJsonFile(DEFAULT_DATA_FILE);
+    const matchesData = await readJsonFile(MATCHES_DATA_FILE);
+    const commentariesData = await readJsonFile(COMMENTARIES_DATA_FILE);
 
-    if (Array.isArray(parsed)) {
-        return { feed: parsed, matches: [] };
+    const seedMatches = Array.isArray(matchesData)
+        ? matchesData
+        : matchesData?.matches;
+    const feed = Array.isArray(commentariesData)
+        ? commentariesData
+        : commentariesData?.commentary ?? commentariesData?.feed;
+
+    if (!Array.isArray(seedMatches)) {
+        throw new Error("matches.json must contain a matches array.");
+    }
+    if (!Array.isArray(feed)) {
+        throw new Error(
+            "commentaries.json must contain a commentary or feed array.",
+        );
     }
 
-    if (Array.isArray(parsed.commentary)) {
-        return {
-            feed: parsed.commentary,
-            matches: Array.isArray(parsed.matches) ? parsed.matches : [],
-        };
-    }
-
-    if (Array.isArray(parsed.feed)) {
-        return {
-            feed: parsed.feed,
-            matches: Array.isArray(parsed.matches) ? parsed.matches : [],
-        };
-    }
-
-    throw new Error(
-        "Seed data must be an array or contain a commentary/feed array.",
-    );
+    return { feed, matches: seedMatches };
 }
 
 async function fetchMatches(limit = 100) {
@@ -79,6 +77,16 @@ function parseDate(value) {
     }
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getMatchKey(match) {
+    return JSON.stringify([
+        match.sport,
+        match.homeTeam,
+        match.awayTeam,
+        match.startTime,
+        match.endTime,
+    ]);
 }
 
 function isLiveMatch(match) {
@@ -558,7 +566,7 @@ async function seed() {
         if (FORCE_LIVE && !isLiveMatch(match)) {
             continue;
         }
-        const key = `${match.sport}|${match.homeTeam}|${match.awayTeam}`;
+        const key = getMatchKey(match);
         if (!matchKeyMap.has(key)) {
             matchKeyMap.set(key, match);
         }
@@ -571,7 +579,7 @@ async function seed() {
 
     if (Array.isArray(seedMatches) && seedMatches.length > 0) {
         for (const seedMatch of matchesToSeed) {
-            const key = `${seedMatch.sport}|${seedMatch.homeTeam}|${seedMatch.awayTeam}`;
+            const key = getMatchKey(seedMatch);
             let match = matchKeyMap.get(key);
             if (!match || (FORCE_LIVE && !isLiveMatch(match))) {
                 match = await createMatch(seedMatch);
