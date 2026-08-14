@@ -79,6 +79,16 @@ function parseDate(value) {
     return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function getMatchKey(match) {
+    return JSON.stringify([
+        match.sport,
+        match.homeTeam,
+        match.awayTeam,
+        match.startTime,
+        match.endTime,
+    ]);
+}
+
 function isLiveMatch(match) {
     const start = parseDate(match.startTime);
     const end = parseDate(match.endTime);
@@ -556,7 +566,7 @@ async function seed() {
         if (FORCE_LIVE && !isLiveMatch(match)) {
             continue;
         }
-        const key = `${match.sport}|${match.homeTeam}|${match.awayTeam}`;
+        const key = getMatchKey(match);
         if (!matchKeyMap.has(key)) {
             matchKeyMap.set(key, match);
         }
@@ -569,7 +579,7 @@ async function seed() {
 
     if (Array.isArray(seedMatches) && seedMatches.length > 0) {
         for (const seedMatch of matchesToSeed) {
-            const key = `${seedMatch.sport}|${seedMatch.homeTeam}|${seedMatch.awayTeam}`;
+            const key = getMatchKey(seedMatch);
             let match = matchKeyMap.get(key);
             if (!match || (FORCE_LIVE && !isLiveMatch(match))) {
                 match = await createMatch(seedMatch);
