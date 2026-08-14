@@ -31,7 +31,8 @@ if (parsedApiUrl.search || parsedApiUrl.hash) {
 parsedApiUrl.pathname = parsedApiUrl.pathname.replace(/\/+$/, "");
 const API_URL = parsedApiUrl.toString().replace(/\/$/, "");
 
-const DEFAULT_DATA_FILE = new URL("../data/data.json", import.meta.url);
+const MATCHES_DATA_FILE = new URL("../data/matches.json", import.meta.url);
+const COMMENTARIES_DATA_FILE = new URL("../data/commentaries.json", import.meta.url);
 
 async function readJsonFile(fileUrl) {
     const raw = await fs.readFile(fileUrl, "utf8");
@@ -39,29 +40,26 @@ async function readJsonFile(fileUrl) {
 }
 
 async function loadSeedData() {
-    const parsed = await readJsonFile(DEFAULT_DATA_FILE);
+    const matchesData = await readJsonFile(MATCHES_DATA_FILE);
+    const commentariesData = await readJsonFile(COMMENTARIES_DATA_FILE);
 
-    if (Array.isArray(parsed)) {
-        return { feed: parsed, matches: [] };
+    const seedMatches = Array.isArray(matchesData)
+        ? matchesData
+        : matchesData?.matches;
+    const feed = Array.isArray(commentariesData)
+        ? commentariesData
+        : commentariesData?.commentary ?? commentariesData?.feed;
+
+    if (!Array.isArray(seedMatches)) {
+        throw new Error("matches.json must contain a matches array.");
+    }
+    if (!Array.isArray(feed)) {
+        throw new Error(
+            "commentaries.json must contain a commentary or feed array.",
+        );
     }
 
-    if (Array.isArray(parsed.commentary)) {
-        return {
-            feed: parsed.commentary,
-            matches: Array.isArray(parsed.matches) ? parsed.matches : [],
-        };
-    }
-
-    if (Array.isArray(parsed.feed)) {
-        return {
-            feed: parsed.feed,
-            matches: Array.isArray(parsed.matches) ? parsed.matches : [],
-        };
-    }
-
-    throw new Error(
-        "Seed data must be an array or contain a commentary/feed array.",
-    );
+    return { feed, matches: seedMatches };
 }
 
 async function fetchMatches(limit = 100) {
