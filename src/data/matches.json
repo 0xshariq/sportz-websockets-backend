@@ -7,7 +7,9 @@
       "awayTeam": "Chelsea FC",
       "startTime": "2026-08-12T11:25:00.000Z",
       "endTime": "2026-08-12T13:15:00.000Z",
-      "status": "live"
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1
     },
     {
       "id": 2,
@@ -16,7 +18,9 @@
       "awayTeam": "South Africa",
       "startTime": "2026-08-12T14:00:00.000Z",
       "endTime": "2026-08-12T22:00:00.000Z",
-      "status": "scheduled"
+      "status": "finished",
+      "homeScore": 286,
+      "awayScore": 279
     },
     {
       "id": 3,
@@ -25,7 +29,9 @@
       "awayTeam": "Chicago Bulls",
       "startTime": "2026-08-13T16:00:00.000Z",
       "endTime": "2026-08-13T18:30:00.000Z",
-      "status": "scheduled"
+      "status": "finished",
+      "homeScore": 112,
+      "awayScore": 108
     },
     {
       "id": 4,
@@ -34,7 +40,9 @@
       "awayTeam": "Bayern Munich",
       "startTime": "2026-08-14T18:00:00.000Z",
       "endTime": "2026-08-14T19:50:00.000Z",
-      "status": "scheduled"
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 1
     },
     {
       "id": 5,
@@ -674,6 +682,122 @@
       "startTime": "2026-10-12T23:00:00.000Z",
       "endTime": "2026-10-13T01:30:00.000Z",
       "status": "scheduled"
+    },
+    {
+      "id": 76,
+      "sport": "football",
+      "homeTeam": "Liverpool",
+      "awayTeam": "Chelsea",
+      "startTime": "2026-08-16T15:00:00.000Z",
+      "endTime": "2026-08-16T16:50:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 77,
+      "sport": "cricket",
+      "homeTeam": "Sri Lanka",
+      "awayTeam": "Pakistan",
+      "startTime": "2026-08-17T10:00:00.000Z",
+      "endTime": "2026-08-17T18:00:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 78,
+      "sport": "basketball",
+      "homeTeam": "Boston Celtics",
+      "awayTeam": "New York Knicks",
+      "startTime": "2026-08-18T23:30:00.000Z",
+      "endTime": "2026-08-19T02:00:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 79,
+      "sport": "tennis",
+      "homeTeam": "Carlos Alcaraz",
+      "awayTeam": "Jannik Sinner",
+      "startTime": "2026-08-20T14:00:00.000Z",
+      "endTime": "2026-08-20T16:30:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 80,
+      "sport": "baseball",
+      "homeTeam": "Chicago Cubs",
+      "awayTeam": "New York Yankees",
+      "startTime": "2026-08-22T18:00:00.000Z",
+      "endTime": "2026-08-22T21:00:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 81,
+      "sport": "football",
+      "homeTeam": "Inter Milan",
+      "awayTeam": "AC Milan",
+      "startTime": "2026-08-24T18:00:00.000Z",
+      "endTime": "2026-08-24T19:50:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 82,
+      "sport": "cricket",
+      "homeTeam": "England",
+      "awayTeam": "New Zealand",
+      "startTime": "2026-08-26T11:00:00.000Z",
+      "endTime": "2026-08-26T19:00:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 83,
+      "sport": "basketball",
+      "homeTeam": "Phoenix Suns",
+      "awayTeam": "Golden State Warriors",
+      "startTime": "2026-08-28T02:00:00.000Z",
+      "endTime": "2026-08-28T04:30:00.000Z",
+      "status": "scheduled"
+    },
+    {
+      "id": 84,
+      "sport": "football",
+      "homeTeam": "Manchester City",
+      "awayTeam": "Liverpool",
+      "startTime": "2026-08-15T09:00:00.000Z",
+      "endTime": "2026-08-15T10:50:00.000Z",
+      "status": "scheduled",
+      "homeScore": 0,
+      "awayScore": 0
+    },
+    {
+      "id": 85,
+      "sport": "cricket",
+      "homeTeam": "Australia",
+      "awayTeam": "New Zealand",
+      "startTime": "2026-08-15T12:00:00.000Z",
+      "endTime": "2026-08-15T19:00:00.000Z",
+      "status": "scheduled",
+      "homeScore": 0,
+      "awayScore": 0
+    },
+    {
+      "id": 86,
+      "sport": "basketball",
+      "homeTeam": "Los Angeles Lakers",
+      "awayTeam": "Miami Heat",
+      "startTime": "2026-08-15T15:00:00.000Z",
+      "endTime": "2026-08-15T17:30:00.000Z",
+      "status": "scheduled",
+      "homeScore": 0,
+      "awayScore": 0
+    },
+    {
+      "id": 87,
+      "sport": "tennis",
+      "homeTeam": "Iga Swiatek",
+      "awayTeam": "Aryna Sabalenka",
+      "startTime": "2026-08-15T18:00:00.000Z",
+      "endTime": "2026-08-15T20:30:00.000Z",
+      "status": "scheduled",
+      "homeScore": 0,
+      "awayScore": 0
     }
   ]
 }
