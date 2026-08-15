@@ -5,8 +5,11 @@ A production-oriented Express and WebSocket backend for live sports matches and 
 ## Features
 
 - REST APIs for matches, scores, and commentary
+- Match listing filters by status and sport
+- Match detail endpoint with time-derived status
+- Ascending or descending commentary pagination
 - WebSocket subscriptions at `/ws`
-- Match-specific score and commentary broadcasts
+- Match-specific score, commentary, creation, and status-change broadcasts
 - Arcjet protection for HTTP and WebSocket upgrades
 - Zod validation for request payloads and environment variables
 - PostgreSQL connection pooling with Drizzle ORM
@@ -68,11 +71,21 @@ pnpm seed            # Seed sample data
 - `GET /health` — liveness status
 - `GET /ready` — database readiness status
 - `GET /matches?limit=50&status=live&sport=football` — list and filter matches
-- `GET /matches/:id` — get one match
+- `GET /matches/:id` — get one match; status is recalculated from timestamps when available
 - `POST /matches` — create a match
 - `PATCH /matches/:id/score` — update a live match score
-- `GET /matches/:id/commentary?limit=10` — list commentary
+- `GET /matches/:id/commentary?limit=10&sort=desc` — list commentary in ascending or descending creation order
 - `POST /matches/:id/commentary` — add commentary
+
+### Match status automation
+
+Every 30 seconds, the background synchronizer evaluates each match using its UTC timestamps:
+
+- `scheduled` — the start time has not been reached
+- `live` — the current time is between `startTime` and `endTime`
+- `finished` — the end time has passed
+
+Only changed statuses are written to PostgreSQL. Each change is also broadcast to clients subscribed to that match as a `match_status_updated` event. The synchronizer is stopped during graceful shutdown to avoid open timers during deployment or restart.
 
 ## WebSocket protocol
 
@@ -108,7 +121,9 @@ docker build --target migrator -t sportz-migrator .
 docker run --rm --env-file .env sportz-migrator
 docker build --target production -t sportz-backend .
 docker run --rm --env-file .env -p 3000:3000 sportz-backend
-``` Configure all secrets through the deployment platform rather than committing `.env` files. Keep `ARCJET_MODE=LIVE`, use TLS at the edge, and monitor `/health` and `/ready`.
+```
+
+Configure all secrets through the deployment platform rather than committing `.env` files. Keep `ARCJET_MODE=LIVE`, use TLS at the edge, and monitor `/health` and `/ready`.
 
 ## Project structure
 
@@ -120,4 +135,3 @@ docker run --rm --env-file .env -p 3000:3000 sportz-backend
 - `src/middleware/` — shared Express error handling
 - `drizzle/` — database migrations
 - `test/` — automated validation tests
-```
