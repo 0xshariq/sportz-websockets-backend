@@ -15,7 +15,8 @@ commentaryRouter.get('/', asyncHandler(async (req, res) => {
   if (!params.success) throw new AppError(400, 'Invalid match ID.', params.error.issues);
   if (!query.success) throw new AppError(400, 'Invalid query parameters.', query.error.issues);
   const limit = Math.min(query.data.limit ?? 10, MAX_LIST_LIMIT);
-  const results = await db.select().from(commentary).where(eq(commentary.matchId, params.data.id)).orderBy(desc(commentary.createdAt)).limit(limit);
+  const order = query.data.sort === 'asc' ? commentary.createdAt : desc(commentary.createdAt);
+  const results = await db.select().from(commentary).where(eq(commentary.matchId, params.data.id)).orderBy(order).limit(limit);
   res.json({ data: results });
 }));
 

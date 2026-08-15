@@ -13,8 +13,24 @@ matchRouter.get('/', asyncHandler(async (req, res) => {
   const parsed = listMatchesQuerySchema.safeParse(req.query);
   if (!parsed.success) throw new AppError(400, 'Invalid query.', parsed.error.issues);
   const limit = Math.min(parsed.data.limit ?? 50, MAX_LIST_LIMIT);
-  const data = await db.select().from(matches).orderBy(desc(matches.createdAt)).limit(limit);
+  const filters = [];
+  if (parsed.data.status) filters.push(eq(matches.status, parsed.data.status));
+  if (parsed.data.sport) filters.push(eq(matches.sport, parsed.data.sport));
+  const data = await db
+    .select()
+    .from(matches)
+    .where(filters.length ? and(...filters) : undefined)
+    .orderBy(desc(matches.createdAt))
+    .limit(limit);
   res.json({ data: data.map((match) => ({ ...match, status: match.startTime && match.endTime ? getMatchStatus(match.startTime, match.endTime) : match.status })) });
+}));
+
+matchRouter.get('/:id', asyncHandler(async (req, res) => {
+  const params = matchIdParamSchema.safeParse(req.params);
+  if (!params.success) throw new AppError(400, 'Invalid match id.', params.error.issues);
+  const [match] = await db.select().from(matches).where(eq(matches.id, params.data.id)).limit(1);
+  if (!match) throw new AppError(404, 'Match not found');
+  res.json({ data: { ...match, status: match.startTime && match.endTime ? getMatchStatus(match.startTime, match.endTime) : match.status } });
 }));
 
 matchRouter.post('/', asyncHandler(async (req, res) => {

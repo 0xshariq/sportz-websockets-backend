@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const listCommentaryQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional(),
+  sort: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export const createCommentarySchema = z.object({

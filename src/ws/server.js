@@ -316,12 +316,20 @@ export function attachWebSocketServer(server) {
         });
     }
 
+    function broadcastMatchStatusUpdated(matchId, status) {
+        broadcastToMatch(matchId, {
+            type: 'match_status_updated',
+            data: { matchId, status }
+        });
+    }
+
     // Expose broadcast functions so the HTTP routes can trigger
     // WebSocket notifications after successful database operations.
     return {
         broadcastMatchCreated,
         broadcastCommentary,
         broadcastScoreUpdate,
+        broadcastMatchStatusUpdated,
         closeWebSocketServer: () => new Promise((resolve) => {
             const deadline = setTimeout(resolve, 5000);
             for (const client of wss.clients) {

@@ -33,6 +33,8 @@ Set `DATABASE_URL` and `ARCJET_KEY` in `.env`. Use `ARCJET_MODE=DRY_RUN` for loc
 
 ## Commands
 
+The server automatically synchronizes every non-finished match every 30 seconds using its UTC `startTime` and `endTime`. Status changes are persisted to PostgreSQL and emitted to subscribers as `match_status_updated` WebSocket events.
+
 ```bash
 pnpm dev             # Start with file watching
 pnpm start           # Start the server
@@ -65,7 +67,8 @@ pnpm seed            # Seed sample data
 - `GET /` — service metadata
 - `GET /health` — liveness status
 - `GET /ready` — database readiness status
-- `GET /matches?limit=50` — list matches
+- `GET /matches?limit=50&status=live&sport=football` — list and filter matches
+- `GET /matches/:id` — get one match
 - `POST /matches` — create a match
 - `PATCH /matches/:id/score` — update a live match score
 - `GET /matches/:id/commentary?limit=10` — list commentary
@@ -87,7 +90,7 @@ Unsubscribe:
 {"type":"unsubscribe","matchId":1}
 ```
 
-Events include `welcome`, `subscribed`, `unsubscribed`, `match_created`, `score_update`, `commentary`, and `error`.
+Events include `welcome`, `subscribed`, `unsubscribed`, `match_created`, `match_status_updated`, `score_update`, `commentary`, and `error`.
 
 ## Production deployment
 

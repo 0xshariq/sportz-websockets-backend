@@ -8,6 +8,8 @@ export const MATCH_STATUS = {
 
 export const listMatchesQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional(),
+  status: z.enum(Object.values(MATCH_STATUS)).optional(),
+  sport: z.string().trim().min(1).optional(),
 });
 
 export const matchIdParamSchema = z.object({
@@ -29,6 +31,12 @@ export const createMatchSchema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "endTime must be chronologically after startTime",
+      path: ["endTime"],
+    });
+  } else if (end.getTime() - start.getTime() > 8 * 60 * 60 * 1000) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "A match cannot last longer than 8 hours",
       path: ["endTime"],
     });
   }

@@ -5,8 +5,9 @@ import { attachWebSocketServer } from './ws/server.js';
 import { securityMiddleware } from './arcjet.js';
 import { commentaryRouter } from './routes/commentary.js';
 import { config, isAllowedOrigin, publicBaseUrl } from './config.js';
-import { pool } from './db/db.js';
+import { db, pool } from './db/db.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
+import { startMatchSyncService } from './services/match-sync-service.js';
 
 const app = express();
 const server = http.createServer(app);
@@ -72,6 +73,12 @@ app.use('/matches/:id/commentary', commentaryRouter);
 const broadcasts = attachWebSocketServer(server);
 Object.assign(app.locals, broadcasts);
 
+const stopMatchSyncService = startMatchSyncService({
+  db,
+  broadcastStatusUpdate: broadcasts.broadcastMatchStatusUpdated,
+});
+app.locals.stopMatchSyncService = stopMatchSyncService;
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
@@ -92,6 +99,7 @@ async function shutdown(signal) {
   shuttingDown = true;
   console.log(`Received ${signal}; shutting down gracefully`);
 
+  stopMatchSyncService();
   await broadcasts.closeWebSocketServer();
   await new Promise((resolve) => server.close(resolve));
   await pool.end();
