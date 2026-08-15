@@ -34,24 +34,33 @@ export async function syncOpenMatchStatuses({ db = defaultDb, broadcastStatusUpd
 
 export function startMatchSyncService({ db = defaultDb, broadcastStatusUpdate, intervalMs = DEFAULT_INTERVAL_MS } = {}) {
   let running = false;
+  let stopping = false;
+  let activeTick = Promise.resolve();
 
   const tick = async () => {
-    if (running) return;
+    if (running || stopping) return;
     running = true;
-    try {
-      await syncOpenMatchStatuses({ db, broadcastStatusUpdate });
-    } catch (error) {
-      console.error('Match status synchronization failed:', error);
-    } finally {
-      running = false;
-    }
+    activeTick = (async () => {
+      try {
+        await syncOpenMatchStatuses({ db, broadcastStatusUpdate });
+      } catch (error) {
+        console.error('Match status synchronization failed:', error);
+      } finally {
+        running = false;
+      }
+    })();
+    await activeTick;
   };
 
   void tick();
-  const interval = setInterval(tick, intervalMs);
+  const interval = setInterval(() => void tick(), intervalMs);
   interval.unref?.();
 
-  return () => clearInterval(interval);
+  return async () => {
+    stopping = true;
+    clearInterval(interval);
+    await activeTick;
+  };
 }
 
 export { DEFAULT_INTERVAL_MS };

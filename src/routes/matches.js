@@ -14,15 +14,17 @@ matchRouter.get('/', asyncHandler(async (req, res) => {
   if (!parsed.success) throw new AppError(400, 'Invalid query.', parsed.error.issues);
   const limit = Math.min(parsed.data.limit ?? 50, MAX_LIST_LIMIT);
   const filters = [];
-  if (parsed.data.status) filters.push(eq(matches.status, parsed.data.status));
   if (parsed.data.sport) filters.push(eq(matches.sport, parsed.data.sport));
-  const data = await db
+  const rows = await db
     .select()
     .from(matches)
     .where(filters.length ? and(...filters) : undefined)
-    .orderBy(desc(matches.createdAt))
-    .limit(limit);
-  res.json({ data: data.map((match) => ({ ...match, status: match.startTime && match.endTime ? getMatchStatus(match.startTime, match.endTime) : match.status })) });
+    .orderBy(desc(matches.createdAt));
+  const data = rows
+    .map((match) => ({ ...match, status: match.startTime && match.endTime ? getMatchStatus(match.startTime, match.endTime) : match.status }))
+    .filter((match) => !parsed.data.status || match.status === parsed.data.status)
+    .slice(0, limit);
+  res.json({ data });
 }));
 
 matchRouter.get('/:id', asyncHandler(async (req, res) => {

@@ -5158,7 +5158,10 @@
       "message": "A wide serve clips the line for a clean ace. (Carlos Alcaraz)",
       "tags": [
         "ace"
-      ]
+      ],
+      "metadata": {
+        "points": 1
+      }
     },
     {
       "matchId": 79,
@@ -5249,7 +5252,10 @@
       "message": "A towering drive clears the wall for a home run. (Chicago Cubs)",
       "tags": [
         "home_run"
-      ]
+      ],
+      "metadata": {
+        "runs": 1
+      }
     },
     {
       "matchId": 80,
@@ -5479,6 +5485,174 @@
       "message": "A quick steal sparks a fast break. (Phoenix Suns)",
       "tags": [
         "steal"
+      ]
+    },
+    {
+      "matchId": 84,
+      "minute": 1,
+      "sequence": 401,
+      "period": "1st half",
+      "eventType": "kickoff",
+      "team": "Manchester City",
+      "actor": "Match official",
+      "message": "Kick-off starts the match with both teams pressing high. (Manchester City)",
+      "tags": [
+        "kickoff"
+      ]
+    },
+    {
+      "matchId": 84,
+      "minute": 24,
+      "sequence": 402,
+      "period": "1st half",
+      "eventType": "shot",
+      "team": "Manchester City",
+      "actor": "Match official",
+      "message": "A driven effort forces a sharp save. (Manchester City)",
+      "tags": [
+        "shot"
+      ]
+    },
+    {
+      "matchId": 84,
+      "minute": 63,
+      "sequence": 403,
+      "period": "2nd half",
+      "eventType": "goal",
+      "team": "Manchester City",
+      "actor": "Match official",
+      "message": "A quick passing move ends in a composed finish. (Manchester City)",
+      "tags": [
+        "goal"
+      ]
+    },
+    {
+      "matchId": 85,
+      "minute": 12,
+      "sequence": 404,
+      "period": "1st innings",
+      "eventType": "boundary",
+      "team": "Australia",
+      "actor": "Match official",
+      "message": "A precise cover drive races away for four. (Australia)",
+      "tags": [
+        "boundary"
+      ],
+      "metadata": {
+        "runs": 4
+      }
+    },
+    {
+      "matchId": 85,
+      "minute": 74,
+      "sequence": 405,
+      "period": "1st innings",
+      "eventType": "wicket",
+      "team": "Australia",
+      "actor": "Match official",
+      "message": "The bowler beats the bat and claims a wicket. (Australia)",
+      "tags": [
+        "wicket"
+      ]
+    },
+    {
+      "matchId": 85,
+      "minute": 148,
+      "sequence": 406,
+      "period": "2nd innings",
+      "eventType": "boundary",
+      "team": "Australia",
+      "actor": "Match official",
+      "message": "A lofted shot clears the rope for six. (Australia)",
+      "tags": [
+        "boundary"
+      ],
+      "metadata": {
+        "runs": 4
+      }
+    },
+    {
+      "matchId": 86,
+      "minute": 5,
+      "sequence": 407,
+      "period": "1st quarter",
+      "eventType": "three_pointer",
+      "team": "Los Angeles Lakers",
+      "actor": "Match official",
+      "message": "A clean three-pointer opens the scoring. (Los Angeles Lakers)",
+      "tags": [
+        "three_pointer"
+      ],
+      "metadata": {
+        "points": 3
+      }
+    },
+    {
+      "matchId": 86,
+      "minute": 22,
+      "sequence": 408,
+      "period": "2nd quarter",
+      "eventType": "rebound",
+      "team": "Los Angeles Lakers",
+      "actor": "Match official",
+      "message": "A strong defensive rebound starts the transition. (Los Angeles Lakers)",
+      "tags": [
+        "rebound"
+      ]
+    },
+    {
+      "matchId": 86,
+      "minute": 41,
+      "sequence": 409,
+      "period": "4th quarter",
+      "eventType": "assist",
+      "team": "Los Angeles Lakers",
+      "actor": "Match official",
+      "message": "A clever assist creates an open layup. (Los Angeles Lakers)",
+      "tags": [
+        "assist"
+      ]
+    },
+    {
+      "matchId": 87,
+      "minute": 4,
+      "sequence": 410,
+      "period": "Set 1",
+      "eventType": "ace",
+      "team": "Iga Swiatek",
+      "actor": "Match official",
+      "message": "A powerful serve lands untouched for an ace. (Iga Swiatek)",
+      "tags": [
+        "ace"
+      ],
+      "metadata": {
+        "points": 1
+      }
+    },
+    {
+      "matchId": 87,
+      "minute": 22,
+      "sequence": 411,
+      "period": "Set 2",
+      "eventType": "break_point",
+      "team": "Iga Swiatek",
+      "actor": "Match official",
+      "message": "A long exchange creates a break-point chance. (Iga Swiatek)",
+      "tags": [
+        "break_point"
+      ]
+    },
+    {
+      "matchId": 87,
+      "minute": 46,
+      "sequence": 412,
+      "period": "Set 3",
+      "eventType": "winner",
+      "team": "Iga Swiatek",
+      "actor": "Match official",
+      "message": "A backhand winner finds the open court. (Iga Swiatek)",
+      "tags": [
+        "winner"
       ]
     }
   ]

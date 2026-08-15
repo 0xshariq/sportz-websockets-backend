@@ -99,7 +99,7 @@ async function shutdown(signal) {
   shuttingDown = true;
   console.log(`Received ${signal}; shutting down gracefully`);
 
-  stopMatchSyncService();
+  await stopMatchSyncService();
   await broadcasts.closeWebSocketServer();
   await new Promise((resolve) => server.close(resolve));
   await pool.end();
